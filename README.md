@@ -1,4 +1,24 @@
 # NodeSPL
+**Sample. Process. Learn.**  
+A distributed signal processing & machine learning framework for IoT and edge devices.
+
+NodeSPL lets you connect multiple lightweight nodes (e.g., Raspberry Pi Pico, ESP32) to a Python-based server for real-time data collection, preprocessing, and advanced analytics.
+
+## 🚀 Features
+- Modular **node-side preprocessing** (outlier detection, normalization, filtering)
+- Centralized **server-side analytics** (FFT, ML models, anomaly detection)
+- Supports **YAML/JSON pipeline definitions** for easy configuration
+- Works with biomedical, environmental, and industrial sensors
+- Scales from **local deployments** to **cloud hosting**
+
+## 📦 Quick Start
+```bash
+git clone https://github.com/yourusername/nodespl.git
+cd nodespl
+pip install -r requirements.txt
+```
+
+# NodeSPL
 Distributed framework to Sample, Process and Learn from multi-source signal data
 
 ## Overview
@@ -6,9 +26,10 @@ Goal:
 A modular framework that allows multiple embedded nodes to send sensor data to a centralized server (especially medical domain). The server processes this data using configurable signal processing and regression algorithms and provides real-time visualization and API access.
 
 ## High-Level Architecture
-+-----------------+          +------------------+          +---------------------+ \n
+``` bash
++-----------------+          +------------------+          +---------------------+ 
 |  Sensor Nodes   |  -->     |  Communication   |  -->     |    Server Backend   |
-|  (RPi Pico W)   |  POST    |  (MQTT or HTTP)  |          | (Flask + ML/Signal) |
+|  (RPi Pico W)   |  POST    |  (MQTT or HTTP)  |          |   (Flask + DSP&ML)  |
 +-----------------+          +------------------+          +----------+----------+
                                                                        |
                                                                        v
@@ -16,10 +37,11 @@ A modular framework that allows multiple embedded nodes to send sensor data to a
                                                             |  Visualization/API  |
                                                             |  (Dashboard + REST) |
                                                             +---------------------+
-
+```
 ## Components
 ### Sensor Node (Device Layer)
 Hardware: Raspberry Pi Pico W
+
 Language: MicroPython
 
 Function:
@@ -59,7 +81,7 @@ Chain of transformations:
 | /health	| GET	| Health check, device status, API key check |
 
 ## File Structure
-
+```bash
 spl_framework/
 ├── server/
 │   ├── app.py             # Flask app
@@ -73,7 +95,7 @@ spl_framework/
 │   └── pico_send.py       # MicroPython script
 ├── requirements.txt
 └── README.md
-
+```
 ### Visualization Layer
 Frontend: <PENDING>
 
