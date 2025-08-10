@@ -5,7 +5,7 @@ A distributed signal processing & machine learning framework for IoT and edge de
 NodeSPL lets you connect multiple lightweight nodes (e.g., Raspberry Pi Pico, ESP32) to a Python-based server for real-time data collection, preprocessing, and advanced analytics.
 
 ## 🚀 Features
-- Modular **node-side preprocessing** (outlier detection, normalization, filtering)
+- Modular **node-side preprocessing** (conditioning, outlier detection, normalization, filtering)
 - Centralized **server-side analytics** (FFT, ML models, anomaly detection)
 - Supports **YAML/JSON pipeline definitions** for easy configuration
 - Works with biomedical, environmental, and industrial sensors
@@ -118,9 +118,9 @@ Hardware-agnostic: Works with any sensor node supporting HTTP/MQTT
 ## MVP Checklist
 | Feature |	Status |
 | ----- | -----|
-| Receive endpoint w/ auth	|✅|
-|In-memory data buffer per device	|✅|
-|Configurable signal + ML pipeline	|✅|
-|Web dashboard (polling)	|✅|
-|Configuration API	|✅|
-|MicroPython node script	|✅|
+| Receive endpoint w/ auth	|TBD|
+|In-memory data buffer per device	|TBD|
+|Configurable signal + ML pipeline	|TBD|
+|Web dashboard (polling)	|TBD|
+|Configuration API	|TBD|
+|MicroPython node script	|TBD|
