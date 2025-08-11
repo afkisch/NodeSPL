@@ -13,7 +13,7 @@ NodeSPL lets you connect multiple lightweight nodes (e.g., Raspberry Pi Pico, ES
 
 ## 📦 Quick Start
 ```bash
-git clone https://github.com/yourusername/nodespl.git
+git clone https://github.com/afkisch/nodespl.git
 cd nodespl
 pip install -r requirements.txt
 ```
@@ -62,7 +62,7 @@ Functionality:
 - Receive and validate incoming data
 - Route to appropriate processing pipeline
 - Store in-memory (via deque) or buffer
-- Expose API endpoints: /data, /configure, /health
+- Expose API endpoints: ```/data```, ```/configure```, ```/health```
 
 ### Processing Pipeline
 Defined per device
@@ -75,10 +75,10 @@ Chain of transformations:
 ## API Design
 |API|Method|Description|
 |-------|----|------------------------------------------|
-| /receive	| POST |	Accepts incoming data ({ "device": "id", "value": 1234 }) |
-| /data	| GET	| Returns recent N samples per device |
-| /configure|	POST | Sets processing pipeline for a device |
-| /health	| GET	| Health check, device status, API key check |
+| ```/receive```	| POST |	Accepts incoming data ({ "device": "id", "value": 1234 }) |
+| ```/data```	| GET	| Returns recent N samples per device |
+| ```/configure```|	POST | Sets processing pipeline for a device |
+| ```/health```	| GET	| Health check, device status, API key check |
 
 ## File Structure
 ```bash
@@ -118,7 +118,7 @@ Hardware-agnostic: Works with any sensor node supporting HTTP/MQTT
 ## MVP Checklist
 | Feature |	Status |
 | ----- | -----|
-| Receive endpoint w/ auth	|TBD|
+| Receive endpoint w/ auth	|✅|
 |In-memory data buffer per device	|TBD|
 |Configurable signal + ML pipeline	|TBD|
 |Web dashboard (polling)	|TBD|
