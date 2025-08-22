@@ -1,0 +1,14 @@
+pipeline:
+  - step: zscore
+    params:
+      first: 1
+  - step: moving_average
+    params:
+      window_size: 3
+  - step: zscore
+  - step: low_pass
+    params:
+      alpha: 0.99
+  - step: high_pass
+    params:
+      alpha: 1

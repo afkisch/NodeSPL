@@ -1,0 +1,7 @@
+{
+    "yaml.schemas": {
+        "./config/pipeline.schema.json": ["pipelines/pipeline_*.yaml"]
+    },
+
+    "editor.rulers": [80, 100, 120]
+}
