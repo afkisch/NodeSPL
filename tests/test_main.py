@@ -5,13 +5,17 @@ from pathlib import Path
 import requests
 import numpy as np
 
+from datetime import datetime, timezone
+
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'config'))
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'src'))
 
 import pipeline_runner
 from config import API_KEY_DICT
 
-api_key = API_KEY_DICT["1"]
+TEST_NODE = "1"
+
+api_key = API_KEY_DICT[TEST_NODE]
 headers = {
     'x-api-key': api_key,
     'Content-Type': 'application/json'
@@ -32,7 +36,7 @@ http_method_dict = {
 }
 
 def test_send_data():
-    url = f"http://{ip}/api/v1/nodes/1/data"
+    url = f"http://{ip}/api/v1/nodes/{TEST_NODE}/data"
     response = make_request(url, post_data)
     #Assertion:
     assert response.status_code == 200  # Validation of status code  
@@ -41,7 +45,7 @@ def test_send_data():
     assert len(data) > 0
 
 def test_get_health():
-    url = f"http://{ip}/api/v1/nodes/1/health"
+    url = f"http://{ip}/api/v1/nodes/{TEST_NODE}/health"
     response = make_request(url, method='GET')
     #Assertion:
     assert response.status_code == 200  # Validation of status code  
@@ -50,7 +54,7 @@ def test_get_health():
     assert len(data) > 0
 
 def test_get_config():
-    url = f"http://{ip}/api/v1/nodes/1/config"
+    url = f"http://{ip}/api/v1/nodes/{TEST_NODE}/config"
     response = make_request(url, method='GET')
     #Assertion:
     assert response.status_code == 200  # Validation of status code  
@@ -59,7 +63,7 @@ def test_get_config():
     assert len(data) > 0
 
 def test_get_latest_node():
-    url = f"http://{ip}/api/v1/nodes/1/latest"
+    url = f"http://{ip}/api/v1/nodes/{TEST_NODE}/latest"
     response = make_request(url, auth=False, method='GET')
     #Assertion:
     assert response.status_code == 200  # Validation of status code  
@@ -70,6 +74,19 @@ def test_get_latest_node():
 def test_get_latest_global():
     url = f"http://{ip}/api/v1/nodes/latest"
     response = make_request(url, auth=False, method='GET')
+    #Assertion:
+    assert response.status_code == 200  # Validation of status code  
+    data = response.json()  
+    # Assertion of body response content:  
+    assert len(data) > 0
+
+def test_heartbeat():
+    post_data_heartbeat = {
+        'node_id': TEST_NODE,
+        'last_seen': datetime.now(timezone.utc).isoformat()
+    }
+    url = f"http://{ip}/api/v1/nodes/{TEST_NODE}/heartbeat"
+    response = make_request(url, post_data_heartbeat, auth=False, method='POST')
     #Assertion:
     assert response.status_code == 200  # Validation of status code  
     data = response.json()  
