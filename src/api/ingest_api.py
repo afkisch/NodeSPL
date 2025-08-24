@@ -29,3 +29,16 @@ def receive_data(node_id):
         return jsonify({'status': 'success'}), 200
     else:
         return jsonify({'error': f'Missing {abs(value_received.nbytes-data['size'])} bytes of JSON data'}), 400
+    
+
+@ingest_api.route('/api/v1/nodes/<node_id>/heartbeat', methods=['POST'])
+#@require_api_key('node')
+def receive_heartbeat(node_id):
+
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'Invalid or missing JSON data'}), 400
+    
+    temp_state.latest_data[node_id]['last_seen'] = data.get('last_seen')
+    return jsonify({'status': 'success'}), 200
