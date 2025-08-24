@@ -119,8 +119,9 @@ Hardware-agnostic: Works with any sensor node supporting HTTP/MQTT
 | Feature |	Status |
 | ----- | -----|
 | Receive endpoint w/ auth	|✅|
-|In-memory data buffer per device	|TBD|
+|In-memory data buffer per device	|✅|
 |Configurable signal + ML pipeline	|TBD|
+|DSP + ML functions	|TBD|
 |Web dashboard (polling)	|TBD|
-|Configuration API	|TBD|
+|Configuration API	|✅|
 |MicroPython node script	|TBD|
