@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Node Dashboard</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .node-card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 10px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .status.green { background: #4caf50; }
+    .status.red { background: #f44336; }
+  </style>
+</head>
+<body>
+  <h1>NodeSPL Dashboard</h1>
+  <h2>Sample. Process. Learn.</h2>
+  <div id="nodes"></div>
+
+  <script>
+    async function loadNodes() {
+      try {
+        const res = await fetch("/api/v1/nodes");
+        const nodes = await res.json();
+        const container = document.getElementById("nodes");
+        container.innerHTML = ""; // clear old cards
+
+        nodes.forEach(node => {
+          const card = document.createElement("div");
+          card.className = "node-card";
+
+          const info = document.createElement("div");
+          info.innerHTML = `<strong>${node.node_id}</strong><br>
+                            Last seen: ${node.last_seen}`;
+
+          const status = document.createElement("div");
+          status.className = "status " + (node.alive ? "green" : "red");
+
+          card.appendChild(info);
+          card.appendChild(status);
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Failed to load nodes", err);
+      }
+    }
+
+    // load immediately and refresh every 5s
+    loadNodes();
+    setInterval(loadNodes, 5000);
+  </script>
+</body>
+</html>
