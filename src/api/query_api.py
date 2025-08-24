@@ -5,9 +5,11 @@ from flask import Blueprint, request, jsonify
 from utils.auth import require_api_key
 
 from datetime import datetime, timezone, timedelta
+import time
 
 query_api = Blueprint('query_api', __name__)
 
+HEALTH_TIMEOUT = 500
 
 @query_api.route("/api/v1/nodes/<node_id>/latest", methods=['GET'])
 def get_latest_node(node_id):
@@ -19,7 +21,10 @@ def get_latest_node(node_id):
 
 @query_api.route("/api/v1/nodes/latest", methods=['GET'])
 def get_latest_all():
-    return jsonify(temp_state.latest_data)
+    latest_data = temp_state.latest_data
+    if not latest_data:
+        return jsonify({'error': f"No data found"}), 400
+    return jsonify(latest_data)
 
 
 @query_api.route("/api/v1/nodes/<node_id>/config", methods=['GET'])
@@ -51,3 +56,23 @@ def get_node_health(node_id):
         }
 
     return jsonify(entry)
+
+@query_api.route("/api/v1/nodes", methods=['GET'])
+def api_node_test():
+
+    latest_data = temp_state.latest_data
+    if not latest_data:
+        return jsonify({'error': f"No data found"}), 400
+
+    latest_data_with_health = list()
+    for node_id, node_data in latest_data.items():
+
+        # Compute health status
+        last_seen = datetime.fromisoformat(node_data['last_seen'])
+        delta = datetime.now(timezone.utc)-last_seen
+        healthy = (delta < timedelta(minutes=5))
+        temp = node_data
+        temp['alive'] = healthy
+        latest_data_with_health.append(temp)
+
+    return jsonify(latest_data_with_health)
