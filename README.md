@@ -94,7 +94,7 @@ All endpoints support **API key authentication** using `x-api-key` header.
 | Receive endpoint w/ auth	|✅|
 |In-memory data buffer per device	|✅|
 |Configurable signal + ML pipeline	|🚧|
-|DSP + ML functions	|TBD|
+|DSP + ML functions	|🚧|
 |Web dashboard (polling)	|🚧|
 |Configuration API	|✅|
 |MicroPython node script	|🚧|
