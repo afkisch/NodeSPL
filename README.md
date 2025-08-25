@@ -1,3 +1,122 @@
+# NodeSPL: Distributed Signal Processing & Machine Learning Framework
+**Sample. Process. Learn.**  
+
+🚧 *Ongoing MVP project* 🚧
+
+**NodeSPL** is a lightweight, configurable framework for **distributed signal acquisition, preprocessing, and server-side analytics**.  
+It’s designed for scenarios where **multiple nodes** (e.g., medical devices, industrial sensors, IoT endpoints) send data to a central server for **signal processing, anomaly detection, and machine learning**.
+
+---
+
+## ✨ Features (MVP Progress)
+
+- ✅ **Node → Server transport layer** using HTTP POST (JSON envelopes)
+- ✅ **Configurable preprocessing on nodes**  
+  - Baseline correction  
+  - Z-score normalization  
+  - Filtering (basic low/high-pass)
+- ✅ **Server-side pipelines** defined in JSON/YAML
+- 🚧 **Flexible data envelope**  
+  - Works with scalars, arrays, dicts, or booleans  
+- ✅ **REST APIs** for data ingest, node health, and configs
+- 🚧 **Web UI** under development (node health, live signal data, pipeline editor)
+
+---
+
+## 📦 Example Data Envelope
+
+```json
+{
+  "node_id": "node-001",
+  "timestamp": "2025-08-25T12:00:00Z",
+  "sensor_type": "ecg",
+  "step": "filtered_signal",
+  "output_type": "array",
+  "output": [0.1, 0.2, 0.3, 0.4]
+}
+
+```
+
+---
+
+## 🛠️ Getting Started
+
+Clone the repository:
+
+```bash
+git clone https://github.com/afkisch/nodespl
+cd nodespl
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the server:
+
+```bash
+python src/app.py
+```
+
+Nodes can POST sensor data to:
+
+```http
+POST /api/v1/nodes/{node_id}/data
+```
+
+---
+
+## 📚 API Overview
+
+- ``` POST /api/v1/nodes/{node_id}/data ``` → ingest new sensor data  
+- ``` GET /api/v1/nodes/{node_id}/latest ``` → fetch last reported data  
+- ``` GET /api/v1/nodes/{node_id}/config ``` → get current pipeline config  
+- ``` POST /api/v1/nodes/{node_id}/heartbeat ``` → send node heartbeat  
+
+All endpoints support **API key authentication** using `x-api-key` header.
+
+---
+
+## 🏗️ High-Level Architecture
+``` bash
++-----------------+          +------------------+          +---------------------+ 
+|  Sensor Nodes   |  -->     |  Communication   |  -->     |    Server Backend   |
+|  (RPi Pico W)   |  POST    |  (MQTT or HTTP)  |          |   (Flask + DSP&ML)  |
++-----------------+          +------------------+          +----------+----------+
+                                                                       |
+                                                                       v
+                                                            +----------+----------+
+                                                            |  Visualization/API  |
+                                                            |  (Dashboard + REST) |
+                                                            +---------------------+
+```
+---
+
+## 🚀 Roadmap
+
+- [ ] Web UI with dynamic rendering (node cards, health indicators, charts)  
+- [ ] Configurable pipeline editor (UI-based)  
+- [ ] MQTT support for scalability (20+ devices)  
+- [ ] Cloud deployment (Docker + AWS / GCP)  
+- [ ] More DSP blocks (FFT, HRV analysis, anomaly detection)  
+- [ ] Support for multiple sensor types (ECG, temp, industrial signals)  
+
+---
+
+## 📌 Changelog
+
+### [0.1.0] – 2025-08-25
+- Initial MVP:
+  - Data ingest API  
+  - Node preprocessing configs  
+  - Server pipeline executor  
+  - REST APIs for data & health  
+  - Automated testing setup
+
+
+
 # NodeSPL
 **Sample. Process. Learn.**  
 A distributed signal processing & machine learning framework for IoT and edge devices.
@@ -13,115 +132,18 @@ NodeSPL lets you connect multiple lightweight nodes (e.g., Raspberry Pi Pico, ES
 
 ## 📦 Quick Start
 ```bash
-git clone https://github.com/afkisch/nodespl.git
+git clone https://github.com/YOURNAME/nodespl.git
 cd nodespl
 pip install -r requirements.txt
 ```
-
-# NodeSPL
-Distributed framework to Sample, Process and Learn from multi-source signal data
-
-## Overview
-Goal:
-A modular framework that allows multiple embedded nodes to send sensor data to a centralized server (especially medical domain). The server processes this data using configurable signal processing and regression algorithms and provides real-time visualization and API access.
-
-## High-Level Architecture
-``` bash
-+-----------------+          +------------------+          +---------------------+ 
-|  Sensor Nodes   |  -->     |  Communication   |  -->     |    Server Backend   |
-|  (RPi Pico W)   |  POST    |  (MQTT or HTTP)  |          |   (Flask + DSP&ML)  |
-+-----------------+          +------------------+          +----------+----------+
-                                                                       |
-                                                                       v
-                                                            +----------+----------+
-                                                            |  Visualization/API  |
-                                                            |  (Dashboard + REST) |
-                                                            +---------------------+
-```
-## Components
-### Sensor Node (Device Layer)
-Hardware: Raspberry Pi Pico W
-
-Language: MicroPython
-
-Function:
-- Read analog ECG signal
-- Normalize or compress data if needed
-- Send to server via HTTP POST
-
-### Communication Layer
-Mode: HTTP (MVP), MQTT (future option)
-API endpoint: POST /receive
-Optional: X-API-KEY auth header
-
-### Server Backend
-Language: Python 3
-Framework: Flask (or FastAPI)
-
-Functionality:
-- Receive and validate incoming data
-- Route to appropriate processing pipeline
-- Store in-memory (via deque) or buffer
-- Expose API endpoints: ```/data```, ```/configure```, ```/health```
-
-### Processing Pipeline
-Defined per device
-
-Chain of transformations:
-- Signal smoothing
-- Feature extraction (optional)
-- Regression (linear, logistic, ...)
-
-## API Design
-|API|Method|Description|
-|-------|----|------------------------------------------|
-| ```/receive```	| POST |	Accepts incoming data ({ "device": "id", "value": 1234 }) |
-| ```/data```	| GET	| Returns recent N samples per device |
-| ```/configure```|	POST | Sets processing pipeline for a device |
-| ```/health```	| GET	| Health check, device status, API key check |
-
-## File Structure
-```bash
-spl_framework/
-├── server/
-│   ├── app.py             # Flask app
-│   ├── pipeline.py        # Signal processing functions
-│   ├── config.py          # Per-device pipeline config
-│   ├── buffer.py          # Stores recent data in memory
-│   ├── auth.py            # API key validation
-│   └── templates/
-│       └── index.html     # Live dashboard
-├── node/
-│   └── pico_send.py       # MicroPython script
-├── requirements.txt
-└── README.md
-```
-### Visualization Layer
-Frontend: <PENDING>
-
-Function:
-- Visualize latest ECG signal
-- Show processed version (e.g., regression overlay)
-
-## Design Principles
-
-Modular: Processing pipeline can be changed per device
-
-Stateless nodes: Devices don’t run ML, just publish
-
-Configurable: Server can dynamically reconfigure pipelines
-
-Open-source friendly: Lightweight, readable, easy to extend
-
-Hardware-agnostic: Works with any sensor node supporting HTTP/MQTT
 
 ## MVP Checklist
 | Feature |	Status |
 | ----- | -----|
 | Receive endpoint w/ auth	|✅|
 |In-memory data buffer per device	|✅|
-|Configurable signal + ML pipeline	|TBD|
+|Configurable signal + ML pipeline	|🚧|
 |DSP + ML functions	|TBD|
-|Web dashboard (polling)	|TBD|
+|Web dashboard (polling)	|🚧|
 |Configuration API	|✅|
-|MicroPython node script	|TBD|
+|MicroPython node script	|🚧|
