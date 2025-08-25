@@ -1,0 +1,32 @@
+node_id: ecg-node-001
+pipelines:
+  raw_signal:
+    display_name: "Raw ECG"
+    output_file: raw_signal.json
+    pipeline:
+      - step: passthrough
+
+  # filtered_signal:
+  #   display_name: "Filtered ECG"
+  #   output_file: filtered_signal.json
+  #   pipeline:
+  #     - step: filter
+  #       params:
+  #         method: lowpass
+  #         cutoff: 40
+
+  # anomaly_detection:
+  #   display_name: "Anomaly Detected"
+  #   output_file: anomaly.json
+  #   pipeline:
+  #     - step: anomaly_detection
+  #       params:
+  #         method: zscore
+  #         threshold: 3
+
+  # hrv:
+  #   display_name: "Heart Rate Variability"
+  #   output_file: hrv.json
+  #   pipeline:
+  #     - step: compute_hrv
+  #       params: {}
