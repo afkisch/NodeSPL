@@ -1,63 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Node Dashboard</title>
-  <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-    .node-card {
-      background: white;
-      border-radius: 8px;
-      padding: 12px;
-      margin: 10px 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .status {
-      width: 12px; height: 12px;
-      border-radius: 50%;
-    }
-    .status.green { background: #4caf50; }
-    .status.red { background: #f44336; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>NodeSPL Dashboard</title>
+  <link rel="stylesheet" href="../static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>NodeSPL Dashboard</h1>
-  <h2>Sample. Process. Learn.</h2>
-  <div id="nodes"></div>
+  <header>
+    <h1>NodeSPL Dashboard</h1>
+    <div class="subtle">Rendering purely by <code>type</code> and <code>display_name</code></div>
+  </header>
+
+  <main id="nodes"></main>
 
   <script>
-    async function loadNodes() {
+    const API_BASE = "/api/v1";
+    const POLL_MS = 3000;
+
+    const renderers = {
+      list: renderArray,
+      bool: renderBool,
+      int: renderScalar,
+      dict: renderDict,
+    };
+
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    function nodeCard(nodeId) {
+      const el = document.createElement("section");
+      el.className = "node-card";
+      el.id = `card-${nodeId}`;
+      el.innerHTML = `
+        <div class="node-head">
+          <h2>${nodeId}</h2>
+          <div class="meta">
+            <span id="last-${nodeId}" class="last-seen">—</span>
+          </div>
+        </div>
+        <div id="outputs-${nodeId}" class="outputs"></div>
+      `;
+      return el;
+    }
+
+    function ensureNodeCard(container, nodeId) {
+      let card = document.getElementById(`card-${nodeId}`);
+      if (!card) {
+        card = nodeCard(nodeId);
+        container.appendChild(card);
+      }
+      return card;
+    }
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderOutput(container, output, uid) {
+      // output: { display_name, type, value }
+      const block = document.createElement("div");
+      block.className = "output-block";
+
+      const title = document.createElement("div");
+      title.className = "output-title";
+      title.textContent = output.display_name;
+      block.appendChild(title);
+
+      const body = document.createElement("div");
+      body.className = "output-body";
+      block.appendChild(body);
+
+      const renderer = renderers[output.type] || renderUnknown;
+      renderer(body, output.value, uid);
+
+      container.appendChild(block);
+    }
+
+    // ==== Renderers (purely by type) ====
+    function renderArray(el, arr, uid) {
+      const canvas = document.createElement("canvas");
+      canvas.id = `chart-${uid}-${Math.random().toString(36).slice(2,7)}`;
+      el.appendChild(canvas);
+      const labels = Array.from({ length: arr.length }, (_, i) => i);
+      new Chart(canvas.getContext("2d"), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{ label: "Series", data: arr }]
+        },
+        options: { animation: false, responsive: true, maintainAspectRatio: false }
+      });
+      el.classList.add("chart-wrap");
+    }
+
+    function renderBool(el, val) {
+      const badge = document.createElement("span");
+      badge.className = `bool-badge ${val ? "bad" : "good"}`;
+      badge.textContent = val ? "Anomaly: YES" : "Anomaly: NO";
+      el.appendChild(badge);
+    }
+
+    function renderScalar(el, val) {
+      const p = document.createElement("div");
+      p.className = "scalar";
+      p.textContent = String(val);
+      el.appendChild(p);
+    }
+
+    function renderDict(el, obj) {
+      const table = document.createElement("table");
+      table.className = "kv";
+      Object.entries(obj).forEach(([k, v]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<th>${k}</th><td>${typeof v === "object" ? JSON.stringify(v) : v}</td>`;
+        table.appendChild(tr);
+      });
+      el.appendChild(table);
+    }
+
+    function renderUnknown(el, val) {
+      const pre = document.createElement("pre");
+      pre.textContent = JSON.stringify(val, null, 2);
+      el.appendChild(pre);
+    }
+
+    async function refresh() {
       try {
-        const res = await fetch("/api/v1/nodes");
-        const nodes = await res.json();
+        const nodes = await fetchJSON(`${API_BASE}/nodes`);
         const container = document.getElementById("nodes");
-        container.innerHTML = ""; // clear old cards
+        for (const nodeId of nodes) {
+          const card = ensureNodeCard(container, nodeId);
+          const data = await fetchJSON(`${API_BASE}/nodes/${nodeId}/results`);
+          const last = card.querySelector(`#last-${nodeId}`);
+          last.textContent = data.last_seen ? `Last seen: ${data.last_seen}` : "No data";
 
-        nodes.forEach(node => {
-          const card = document.createElement("div");
-          card.className = "node-card";
-
-          const info = document.createElement("div");
-          info.innerHTML = `<strong>${node.node_id}</strong><br>
-                            Last seen: ${node.last_seen}`;
-
-          const status = document.createElement("div");
-          status.className = "status " + (node.alive ? "green" : "red");
-
-          card.appendChild(info);
-          card.appendChild(status);
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error("Failed to load nodes", err);
+          const outputsWrap = card.querySelector(`#outputs-${nodeId}`);
+          clear(outputsWrap);
+          (data.outputs || []).forEach((out, idx) => {
+            // Expect: { display_name, type, value }
+            renderOutput(outputsWrap, out, `${nodeId}-${idx}`);
+          });
+        }
+      } catch (e) {
+        console.error("Refresh error:", e);
+      } finally {
+        setTimeout(refresh, POLL_MS);
       }
     }
 
-    // load immediately and refresh every 5s
-    loadNodes();
-    setInterval(loadNodes, 5000);
+    refresh();
   </script>
 </body>
 </html>
