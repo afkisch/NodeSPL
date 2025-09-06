@@ -22,6 +22,7 @@
       list: renderArray,
       bool: renderBool,
       int: renderScalar,
+      float: renderScalar,
       dict: renderDict,
     };
 
@@ -90,7 +91,12 @@
           labels,
           datasets: [{ label: "Series", data: arr }]
         },
-        options: { animation: false, responsive: true, maintainAspectRatio: false }
+        options: { 
+          animation: false, 
+          responsive: true, 
+          maintainAspectRatio: false,
+          elements: { point: { radius: 0}}
+        }
       });
       el.classList.add("chart-wrap");
     }
