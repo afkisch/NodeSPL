@@ -1,32 +1,50 @@
-node_id: ecg-node-001
+nodes:
+  - "node-1" # TODO: Add support for int node names
+  - "node-2"
+
 pipelines:
   raw_signal:
     display_name: "Raw ECG"
     output_file: raw_signal.json
     pipeline:
       - step: passthrough
+  
+  zscored_signal:
+    display_name: "Zscore"
+    output_file: zscore.json
+    pipeline:
+      - step: zscore
+      - step: downsample
 
-  # filtered_signal:
-  #   display_name: "Filtered ECG"
-  #   output_file: filtered_signal.json
-  #   pipeline:
-  #     - step: filter
-  #       params:
-  #         method: lowpass
-  #         cutoff: 40
+  threshed_signal:
+    display_name: "Threshold"
+    output_file: thresh.json
+    pipeline:
+      - step: zscore
+      - step: threshold_anomaly
+        params:
+          high: 3
+          low: -1
+  
+  bandpassed_signal:
+    display_name: "Bandpassed"
+    pipeline:
+      - step: moving_average
+      - step: bandpass
+        params:
+          order: 3
+          high: 10
+          low: 0.5
+      - step: scale
+        params:
+          factor: 3.0
+          offset: 5.0
+      - step: downsample
 
-  # anomaly_detection:
-  #   display_name: "Anomaly Detected"
-  #   output_file: anomaly.json
-  #   pipeline:
-  #     - step: anomaly_detection
-  #       params:
-  #         method: zscore
-  #         threshold: 3
-
-  # hrv:
-  #   display_name: "Heart Rate Variability"
-  #   output_file: hrv.json
-  #   pipeline:
-  #     - step: compute_hrv
-  #       params: {}
+  filtered_signal:
+    display_name: "Filtered ECG"
+    output_file: filtered_signal.json
+    pipeline:
+      - step: lowpass
+        params:
+          cutoff: 5
