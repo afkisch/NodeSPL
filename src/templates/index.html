@@ -38,7 +38,10 @@
       el.id = `card-${nodeId}`;
       el.innerHTML = `
         <div class="node-head">
-          <h2>${nodeId}</h2>
+          <h2>
+            <span class="health-dot" id="health-${nodeId}"></span>
+            ${nodeId}
+          </h2>
           <div class="meta">
             <span id="last-${nodeId}" class="last-seen">—</span>
           </div>
@@ -89,15 +92,20 @@
         type: "line",
         data: {
           labels,
-          datasets: [{ label: "Series", data: arr }]
+          datasets: [{
+            label: "Series",
+            data: arr,
+            showLine: false,     // hide connecting line
+            pointRadius: 0.1       // small dots
+          }]
         },
         options: { 
           animation: false, 
           responsive: true, 
-          maintainAspectRatio: false,
-          elements: { point: { radius: 0}}
+          maintainAspectRatio: false
         }
       });
+
       el.classList.add("chart-wrap");
     }
 
@@ -138,6 +146,22 @@
         const container = document.getElementById("nodes");
         for (const nodeId of nodes) {
           const card = ensureNodeCard(container, nodeId);
+
+          // Health status
+          try {
+            const health = await fetchJSON(`${API_BASE}/nodes/${nodeId}/health`);
+            const dot = card.querySelector(`#health-${nodeId}`);
+            if (health.status === "healthy") {
+              dot.style.backgroundColor = "green";
+            } else {
+              dot.style.backgroundColor = "red";
+            }
+            dot.className = "health-dot"; // keep shape
+          } catch {
+            const dot = card.querySelector(`#health-${nodeId}`);
+            dot.style.backgroundColor = "red";
+          }
+
           const data = await fetchJSON(`${API_BASE}/nodes/${nodeId}/results`);
           const last = card.querySelector(`#last-${nodeId}`);
           last.textContent = data.last_seen ? `Last seen: ${data.last_seen}` : "No data";
