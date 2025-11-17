@@ -6,10 +6,10 @@
 **NodeSPL** is a lightweight, configurable framework for **distributed signal acquisition, preprocessing, and server-side analytics**.  
 It’s designed for scenarios where **multiple nodes** (e.g., medical devices, industrial sensors, IoT endpoints) send data to a central server for **signal processing, anomaly detection, and machine learning**.
 
-# Dashboard
+## Dashboard
 ![alt text](https://github.com/afkisch/NodeSPL/blob/main/img/nodespl_dashboard.png?raw=true)
 
-# Pipeline configuration tool
+## Pipeline configuration tool
 ![alt text](https://github.com/afkisch/NodeSPL/blob/main/img/nodespl_pipeline.png?raw=true)
 
 
