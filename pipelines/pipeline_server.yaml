@@ -5,27 +5,26 @@ nodes:
 pipelines:
   raw_signal:
     display_name: "Raw ECG"
-    output_file: raw_signal.json
     pipeline:
       - step: passthrough
-  
+        params:
+          scale: 2
+
   zscored_signal:
     display_name: "Zscore"
-    output_file: zscore.json
     pipeline:
       - step: zscore
       - step: downsample
 
   threshed_signal:
     display_name: "Threshold"
-    output_file: thresh.json
     pipeline:
       - step: zscore
       - step: threshold_anomaly
         params:
           high: 3
           low: -1
-  
+
   bandpassed_signal:
     display_name: "Bandpassed"
     pipeline:
@@ -43,8 +42,28 @@ pipelines:
 
   filtered_signal:
     display_name: "Filtered ECG"
-    output_file: filtered_signal.json
     pipeline:
       - step: lowpass
         params:
           cutoff: 5
+
+---
+
+nodes:
+- node-4
+pipelines:
+  raw:
+    display_name: Raw
+    pipeline:
+    - step: passthrough
+      params: {}
+  zscore:
+    display_name: zscore
+    pipeline:
+    - step: zscore
+      params: {}
+  avg:
+    display_name: Avg
+    pipeline:
+    - step: mean
+      params: {}
