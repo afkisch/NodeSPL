@@ -3,12 +3,6 @@
 import numpy as np
 from datetime import datetime, timezone
 from utils.auth import require_api_key
-import pipeline_runner_server
-import os
-from db import db
-import json
-
-import temp_state
 
 from flask import Blueprint, request, jsonify, current_app
 ingest_api = Blueprint('ingest_api', __name__)
@@ -31,22 +25,13 @@ def receive_data(node_id):
             "last_seen": datetime.now(timezone.utc).isoformat()
         }
 
-        if node_id not in temp_state.nodes:
-            temp_state.nodes.append(node_id)                                            # TODO: Add TTL
+        if node_id not in current_app.cache.set_members():
+            current_app.cache.set_add('nodes', node_id)
 
-        current_app.cache.set(f'{node_id}:latest', entry)
-
-        #temp_state.latest_data[node_id] = entry
-        #temp_state.results = pipeline_runner_server.run_server_pipelines(entry, os.path.join(           # TODO: Move processing to dedicated thread with staging data
-        #    os.path.abspath('.'), 'pipelines', 'pipeline_server.yaml'))
+        current_app.cache.kv_set(f'{node_id}:latest', entry)
         
-        result = pipeline_runner_server.run_server_pipelines(entry, os.path.join(
-            os.path.abspath('.'), 'pipelines', 'pipeline_server.yaml'))
-        
-        current_app.cache.set(f'{node_id}:result', result)
-        
-        DB_PATH = os.path.join(os.path.abspath(''), 'src', 'db', 'node.db')                            # TODO: Move DB-operations to dedicated thread
-        db.log_to_db(node_id, data['value'], DB_PATH)
+        # DB_PATH = os.path.join(os.path.abspath(''), 'src', 'db', 'node.db')                            # TODO: Move DB-operations to dedicated thread
+        # db.log_to_db(node_id, data['value'], DB_PATH)
         
         return jsonify({'status': 'success'}), 200
     else:
